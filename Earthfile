@@ -4,6 +4,9 @@ ARG NAME=acl
 ARG DOCKER_REPO=ghcr.io/stackitcloud/gardener-extension-$NAME
 ARG BINPATH=/usr/local/bin/
 ARG GOCACHE=/go-cache
+ARG T_OS=linux
+ARG T_ARCH=amd64
+ARG PLATFORM=$T_OS/$T_ARCH
 
 local-setup:
     LOCALLY
@@ -68,14 +71,14 @@ docker-ci:
     BUILD +docker-webhook --DOCKER_TAG=$(cat VERSION)
 
 docker-extension:
-    ARG TARGETPLATFORM
-    ARG TARGETOS
-    ARG TARGETARCH
+    ARG PLATFORM
+    ARG TOS
+    ARG TARCH
     ARG DOCKER_TAG
-    FROM --platform=$TARGETPLATFORM \
+    FROM --platform=$PLATFORM \
         gcr.io/distroless/static:nonroot
-    COPY --platform=$USERPLATFORM \
-        (+build-extension-controller/gardener-extension --GOOS=$TARGETOS --GOARCH=$TARGETARCH) /gardener-extension
+    COPY --platform=$PLATFORM \
+        (+build-extension-controller/gardener-extension --GOOS=$TOS --GOARCH=$TARCH) /gardener-extension
     USER 65532:65532
     ENTRYPOINT ["/gardener-extension"]
     SAVE IMAGE --push $DOCKER_REPO-controller:$DOCKER_TAG
@@ -85,10 +88,10 @@ docker-webhook:
     ARG TARGETOS
     ARG TARGETARCH
     ARG DOCKER_TAG
-    FROM --platform=$TARGETPLATFORM \
+    FROM --platform=$PLATFORM \
         gcr.io/distroless/static:nonroot
-    COPY --platform=$USERPLATFORM \
-        (+build-webhook/webhook --GOOS=$TARGETOS --GOARCH=$TARGETARCH) /webhook
+    COPY --platform=$PLATFORM \
+        (+build-webhook/webhook --GOOS=$TOS --GOARCH=$TARCH) /webhook
     USER 65532:65532
     ENTRYPOINT ["/webhook"]
     SAVE IMAGE --push $DOCKER_REPO-webhook:$DOCKER_TAG

@@ -86,6 +86,7 @@ func main() {
 		Client:             mgr.GetClient(),
 		EnvoyFilterService: envoyfilters.EnvoyFilterService{},
 		WebhookConfig:      aclwebhook.Config{AdditionalAllowedCidrs: allowedCidrs},
+		D
 	}})
 
 	mgr.Add(server)
