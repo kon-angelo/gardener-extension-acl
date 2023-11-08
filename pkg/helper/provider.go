@@ -3,6 +3,8 @@ package helper
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 
 	openstackv1alpha1 "github.com/gardener/gardener-extension-provider-openstack/pkg/apis/openstack/v1alpha1"
 	"github.com/gardener/gardener-extension-provider-openstack/pkg/openstack"
@@ -17,6 +19,15 @@ func GetProviderSpecificAllowedCIDRs(
 	infra *extensionsv1alpha1.Infrastructure,
 ) ([]string, error) {
 	cidrs := make([]string, 0)
+	if eips := infra.Status.EgressIPs; len(infra.Status.EgressIPs) > 0 {
+		for _, egress := range eips {
+			// if this is an IP then we need to translate it into a CIDR. We do that by appending the "/32" mask.
+			if !strings.Contains(egress, "/") {
+				cidrs = append(cidrs, fmt.Sprintf("%s/32", egress))
+			}
+		}
+		return eips, nil
+	}
 
 	//nolint:gocritic // Will likely be extended with other infra types in the future
 	switch infra.Spec.Type {

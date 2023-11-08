@@ -128,6 +128,6 @@ require (
 )
 
 replace (
-k8s.io/client-go => k8s.io/client-go v0.28.3
-github.com/gardener/gardener => github.com/kon-angelo/gardener
+	github.com/gardener/gardener => github.com/kon-angelo/gardener v1.9.1-0.20231107103800-55436bc9634a
+	k8s.io/client-go => k8s.io/client-go v0.28.3
 )
