@@ -43,6 +43,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/stackitcloud/gardener-extension-acl/charts"
 	"github.com/stackitcloud/gardener-extension-acl/pkg/controller/config"
@@ -61,9 +62,8 @@ const (
 	// ImageName is used for the image vector override.
 	// This is currently not implemented correctly.
 	// TODO implement
-	ImageName         = "image-name"
-	deletionTimeout   = 2 * time.Minute
-	OpenstackTypeName = "openstack"
+	ImageName       = "image-name"
+	deletionTimeout = 2 * time.Minute
 )
 
 var (
@@ -76,8 +76,11 @@ var (
 )
 
 // NewActuator returns an actuator responsible for Extension resources.
-func NewActuator(cfg config.Config) extension.Actuator {
+func NewActuator(mgr manager.Manager, cfg config.Config) extension.Actuator {
 	return &actuator{
+		client:             mgr.GetClient(),
+		config:             mgr.GetConfig(),
+		decoder:            serializer.NewCodecFactory(mgr.GetScheme(), serializer.EnableStrict).UniversalDecoder(),
 		extensionConfig:    cfg,
 		envoyfilterService: envoyfilters.EnvoyFilterService{},
 	}
@@ -233,24 +236,6 @@ func (a *actuator) Restore(ctx context.Context, log logr.Logger, ex *extensionsv
 // Migrate the Extension resource.
 func (a *actuator) Migrate(ctx context.Context, log logr.Logger, ex *extensionsv1alpha1.Extension) error {
 	return a.Delete(ctx, log, ex)
-}
-
-// InjectConfig injects the rest config to this actuator.
-func (a *actuator) InjectConfig(cfg *rest.Config) error {
-	a.config = cfg
-	return nil
-}
-
-// InjectClient injects the controller runtime client into the reconciler.
-func (a *actuator) InjectClient(c client.Client) error {
-	a.client = c
-	return nil
-}
-
-// InjectScheme injects the given scheme into the reconciler.
-func (a *actuator) InjectScheme(scheme *runtime.Scheme) error {
-	a.decoder = serializer.NewCodecFactory(scheme, serializer.EnableStrict).UniversalDecoder()
-	return nil
 }
 
 func (a *actuator) reconcileVPNEnvoyFilter(

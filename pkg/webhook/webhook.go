@@ -7,16 +7,18 @@ import (
 	"strings"
 
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
-	"github.com/stackitcloud/gardener-extension-acl/pkg/controller"
-	"github.com/stackitcloud/gardener-extension-acl/pkg/envoyfilters"
-	"github.com/stackitcloud/gardener-extension-acl/pkg/helper"
 	"github.com/tidwall/gjson"
 	"gomodules.xyz/jsonpatch/v2"
 	istionetworkingClientGo "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	v1 "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	"github.com/stackitcloud/gardener-extension-acl/pkg/controller"
+	"github.com/stackitcloud/gardener-extension-acl/pkg/envoyfilters"
+	"github.com/stackitcloud/gardener-extension-acl/pkg/helper"
 )
 
 const (
@@ -28,6 +30,15 @@ const (
 type Config struct {
 	// AdditionalAllowedCidrs additional allowed cidrs that will be added to the list of allowed cidrs.
 	AdditionalAllowedCidrs []string
+}
+
+func NewEnvoyFilterWebhook(mgr manager.Manager, allowedCidrs []string) *EnvoyFilterWebhook {
+	return &EnvoyFilterWebhook{
+		Client:             mgr.GetClient(),
+		EnvoyFilterService: envoyfilters.EnvoyFilterService{},
+		decoder:            admission.NewDecoder(mgr.GetScheme()),
+		WebhookConfig:      Config{AdditionalAllowedCidrs: allowedCidrs},
+	}
 }
 
 type EnvoyFilterWebhook struct {
@@ -137,9 +148,4 @@ func (e *EnvoyFilterWebhook) createAdmissionResponse(
 			PatchType: &pt,
 		},
 	}
-}
-
-func (e *EnvoyFilterWebhook) InjectDecoder(d *admission.Decoder) error {
-	e.decoder = d
-	return nil
 }

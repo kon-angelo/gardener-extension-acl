@@ -16,7 +16,6 @@ import (
 
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
 
-	"github.com/stackitcloud/gardener-extension-acl/pkg/envoyfilters"
 	aclwebhook "github.com/stackitcloud/gardener-extension-acl/pkg/webhook"
 )
 
@@ -82,12 +81,7 @@ func main() {
 
 	allowedCidrs := strings.Split(additionalAllowedCidrs, ",")
 
-	server.Register("/mutate", &webhook.Admission{Handler: &aclwebhook.EnvoyFilterWebhook{
-		Client:             mgr.GetClient(),
-		EnvoyFilterService: envoyfilters.EnvoyFilterService{},
-		WebhookConfig:      aclwebhook.Config{AdditionalAllowedCidrs: allowedCidrs},
-		D
-	}})
+	server.Register("/mutate", &webhook.Admission{Handler: aclwebhook.NewEnvoyFilterWebhook(mgr, allowedCidrs)})
 
 	mgr.Add(server)
 

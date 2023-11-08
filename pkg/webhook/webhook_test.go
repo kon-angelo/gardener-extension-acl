@@ -8,13 +8,14 @@ import (
 	"strings"
 
 	openstackv1alpha1 "github.com/gardener/gardener-extension-provider-openstack/pkg/apis/openstack/v1alpha1"
+	"github.com/gardener/gardener-extension-provider-openstack/pkg/openstack"
 	core "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
-	"github.com/stackitcloud/gardener-extension-acl/pkg/controller"
-	"github.com/stackitcloud/gardener-extension-acl/pkg/envoyfilters"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/stackitcloud/gardener-extension-acl/pkg/controller"
+	"github.com/stackitcloud/gardener-extension-acl/pkg/envoyfilters"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -266,7 +267,7 @@ var _ = Describe("webhook unit test", func() {
 
 				Expect(k8sClient.Create(ctx, ext)).To(Succeed())
 
-				infra.Spec.Type = controller.OpenstackTypeName
+				infra.Spec.Type = openstack.Type
 				Expect(k8sClient.Update(ctx, infra)).To(Succeed())
 
 				infraStatusJSON, err := json.Marshal(&openstackv1alpha1.InfrastructureStatus{
