@@ -127,4 +127,7 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace k8s.io/client-go => k8s.io/client-go v0.28.3
+replace (
+	github.com/gardener/gardener => github.com/kon-angelo/gardener v1.9.1-0.20231108211259-fa84b1807ffb
+	k8s.io/client-go => k8s.io/client-go v0.28.3
+)

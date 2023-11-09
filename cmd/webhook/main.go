@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
 
@@ -86,6 +87,7 @@ func main() {
 		Client:             mgr.GetClient(),
 		EnvoyFilterService: envoyfilters.EnvoyFilterService{},
 		WebhookConfig:      aclwebhook.Config{AdditionalAllowedCidrs: allowedCidrs},
+		Decoder:            admission.NewDecoder(mgr.GetScheme()),
 	}})
 
 	mgr.Add(server)

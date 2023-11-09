@@ -62,9 +62,8 @@ const (
 	// ImageName is used for the image vector override.
 	// This is currently not implemented correctly.
 	// TODO implement
-	ImageName         = "image-name"
-	deletionTimeout   = 2 * time.Minute
-	OpenstackTypeName = "openstack"
+	ImageName       = "image-name"
+	deletionTimeout = 2 * time.Minute
 )
 
 var (
